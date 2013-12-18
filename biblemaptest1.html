@@ -1,0 +1,67 @@
+<html>
+<head>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
+    
+    
+    
+<script>
+    
+    $(document).ready(function(){
+        
+        
+    
+        
+        $("#go").on("click", function(){
+            
+            $("#spot").css("left","200px");
+            
+        });
+        
+    });
+    
+    
+    
+</script>
+    
+<style>
+
+body {
+    
+    
+}
+    
+#background{
+    background: url('AbrahamMap2.jpg') no-repeat center center;
+   /* Ensure the html element always takes up the full height of the browser window */
+    min-height:100%;
+
+    /* The Magic */
+    background-size:cover;
+
+}
+    
+    #spot{
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 100px;
+        left: 100px;
+        background-color: red;
+    }
+  
+</style>
+    
+</head>
+<body>
+<div id="control">
+    <input id="go" value= "GO" type="button"/>
+    </div>
+<div id="background"></div> 
+<div id="spot"></div>
+    
+    
+    
+</body>
+
+</html>
