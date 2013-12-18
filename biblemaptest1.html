@@ -7,6 +7,18 @@
     
 <script>
     
+    var geodata = [
+     
+        [200,200, "This is where we start"],
+        [300,200, "Here is step 1"],
+        [400,300, "Another step"],
+        [400, 500, "Meet a great way"],
+        [300,400, "return"]        
+        
+    ];
+    
+    var currPos = 0;
+    
     $(document).ready(function(){
         
         
@@ -14,8 +26,19 @@
         
         $("#go").on("click", function(){
             
-            $("#spot").css("left","200px");
             
+            //alert("pos" + geodata[currPos][0]);
+            
+            $("#spot").css("left", geodata[currPos][0] + "px");
+            $("#spot").css("top", geodata[currPos][1] + "px");
+            
+            //alert(currPos + ' ' + geodata.length);
+            
+            if(currPos >= geodata.length - 1){
+                currPos = 0;
+            }else{
+                currPos = currPos + 1;
+            }
         });
         
     });
