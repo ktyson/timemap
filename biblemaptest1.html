@@ -9,11 +9,11 @@
     
     var geodata = [
      
-        [200,200, "This is where we start"],
-        [300,200, "Here is step 1"],
-        [400,300, "Another step"],
-        [400, 500, "Meet a great way"],
-        [300,400, "return"]        
+        [1166 , 688, "This is where we start"],
+        [960 , 470, "Here is step 1"],
+        [570 , 134, "Another step"],
+        [326 , 402, "Meet a great way"],
+        [260 , 581, "return"]        
         
     ];
     
@@ -22,26 +22,78 @@
     $(document).ready(function(){
         
         
-    
+        $(window).on("resize", function(){
+            
+            $("#spot").css("left", adjustLoc("left", geodata[currPos][0]) + "px");
+            $("#spot").css("top", adjustLoc("top", geodata[currPos][1]) + "px");            
+            
+            
+        });
         
-        $("#go").on("click", function(){
+        
+        $("#background").on("click", function(e){
+               
+            var posX = $(this).offset().left, posY = $(this).offset().top;
+            alert((e.pageX - posX)+ ' , ' + (e.pageY - posY));
+                            
+        });
+        
+        $(".goDirection").on("click", function() {
             
-            
-            //alert("pos" + geodata[currPos][0]);
-            
-            $("#spot").css("left", geodata[currPos][0] + "px");
-            $("#spot").css("top", geodata[currPos][1] + "px");
-            
-            //alert(currPos + ' ' + geodata.length);
-            
-            if(currPos >= geodata.length - 1){
-                currPos = 0;
-            }else{
-                currPos = currPos + 1;
+            if($(this).attr("id") == "goBack") {
+                
+                if (currPos < geodata.length - 1) {                    
+                    currPos = currPos + 1;
+                } else {
+                    
+                }
+            } else {
+             
+                if (currPos > 0) { 
+                    currPos = currPos - 1;
+                } else {
+                    
+                }
             }
+            
+            $("#spot").css("left", adjustLoc("left", geodata[currPos][0]) + "px");
+            $("#spot").css("top", adjustLoc("top", geodata[currPos][1]) + "px");
+            
+
         });
         
     });
+    
+    
+    function adjustLoc(direction, position){
+        
+        //jpg = 2800 × 2287
+        
+        var fullWidth = 1525;
+        var fullHeight = 970;
+        
+        var winWidth = parseInt($("#background").css("width"));
+        var winHeight = parseInt($("#background").css("height"));
+        
+        var scaleWidth = winWidth / fullWidth;
+        var scaleHeight = winHeight / fullHeight;
+
+console.log("width",fullWidth,winWidth,scaleWidth);
+console.log("height",fullHeight,winHeight,scaleHeight);
+        //return position; 
+        if(direction == "left") {
+            
+            return position * scaleWidth;
+            
+        } else {
+            
+            return position * scaleHeight;
+        }
+        
+        
+        
+        
+    }
     
     
     
@@ -58,19 +110,22 @@ body {
     background: url('AbrahamMap2.jpg') no-repeat center center;
    /* Ensure the html element always takes up the full height of the browser window */
     min-height:100%;
-
     /* The Magic */
     background-size:cover;
-
 }
     
     #spot{
         position: absolute;
-        width: 20px;
-        height: 20px;
-        top: 100px;
-        left: 100px;
-        background-color: red;
+        width: 60px;
+        height: 105px;
+        top: 1166px;
+        left: 688px;
+        background-image: url(abraham1.gif) ;
+        background-size: 100%;   
+    }
+    
+    #control{
+        text-align: center;   
     }
   
 </style>
@@ -78,7 +133,8 @@ body {
 </head>
 <body>
 <div id="control">
-    <input id="go" value= "GO" type="button"/>
+    <input id="goBack" class="goDirection" value= "<<" type="button"/>
+    <input id="goForth" class="goDirection" value= ">>" type="button"/>
     </div>
 <div id="background"></div> 
 <div id="spot"></div>
