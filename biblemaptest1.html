@@ -6,16 +6,19 @@
     
     
 <script>
-    
+//0 = lon, 1 = lat  
     var geodata = [
      
-        [1166 , 688, "This is where we start"],
-        [960 , 470, "Here is step 1"],
-        [570 , 134, "Another step"],
-        [326 , 402, "Meet a great way"],
-        [260 , 581, "return"]        
-        
+[30.96205, 46.10374, "Ur", "Abram traveled from Ur to Haran with his father Terah and settled there (Gen 11:31)"],
+[38.86386, 39.03219, "Haran", "God called Abram from Haran to Canaan (Gen 12:1)"],
+[31.93053, 35.22103, "Canaan", "Abram arrived in the land, heard from the Lord at Shechem and worshipped at Bethel (Gen 12:6-8)"]  
+
     ];
+    
+    
+    
+    
+    
     
     var currPos = 0;
     
@@ -23,77 +26,140 @@
         
         
         $(window).on("resize", function(){
-            
-            $("#spot").css("left", adjustLoc("left", geodata[currPos][0]) + "px");
-            $("#spot").css("top", adjustLoc("top", geodata[currPos][1]) + "px");            
-            
+                     
+console.log("resize",currPos);             
+            adjustLoc();
             
         });
         
         
         $("#background").on("click", function(e){
-               
+            
             var posX = $(this).offset().left, posY = $(this).offset().top;
-            alert((e.pageX - posX)+ ' , ' + (e.pageY - posY));
+            var pixels = {};
+            pixels.x = e.pageX - posX;
+            pixels.y = e.pageY - posY
+            
+            var coords = findLoc(pixels);
+            
+            console.log(pixels.x + ", " + pixels.y);
+            console.log(coords.lon + ", " + coords.lat);
                             
         });
         
-        $(".goDirection").on("click", function() {
+        $("#reset").on("click", function() {
+         
             
-            if($(this).attr("id") == "goBack") {
-                
-                if (currPos < geodata.length - 1) {                    
-                    currPos = currPos + 1;
-                } else {
-                    
-                }
-            } else {
-             
-                if (currPos > 0) { 
-                    currPos = currPos - 1;
-                } else {
-                    
-                }
-            }
-            
-            $("#spot").css("left", adjustLoc("left", geodata[currPos][0]) + "px");
-            $("#spot").css("top", adjustLoc("top", geodata[currPos][1]) + "px");
-            
+            currPos = 0;
+console.log("reset", currPos);             
+            adjustLoc();            
 
+        });
+        
+        $("#move").on("click", function() { 
+                        
+            if (currPos < geodata.length - 1) { 
+                currPos = currPos + 1;
+            }
+console.log("move", currPos);                
+            adjustLoc();
         });
         
     });
     
     
-    function adjustLoc(direction, position){
-        
-        //jpg = 2800 × 2287
-        
-        var fullWidth = 1525;
-        var fullHeight = 970;
-        
-        var winWidth = parseInt($("#background").css("width"));
-        var winHeight = parseInt($("#background").css("height"));
-        
-        var scaleWidth = winWidth / fullWidth;
-        var scaleHeight = winHeight / fullHeight;
+    function adjustLoc(){
 
-console.log("width",fullWidth,winWidth,scaleWidth);
-console.log("height",fullHeight,winHeight,scaleHeight);
-        //return position; 
-        if(direction == "left") {
-            
-            return position * scaleWidth;
-            
-        } else {
-            
-            return position * scaleHeight;
-        }
+        var dims = {};
+        dims.width = parseInt($("#background").css("width"));
+        dims.height = parseInt($("#background").css("height"));     
+
+        var coords = {};
+        coords.lat = parseFloat(geodata[currPos][0]);
+        coords.lon = parseFloat(geodata[currPos][1]);
         
-        
-        
+        var pixels = tt.MapConvert.GetPixelsFromCoords(coords, dims);
+                
+        $("#spot").css("left", pixels.x + "px");
+        $("#spot").css("top", pixels.y + "px");                
         
     }
+    
+
+    function findLoc(pixels){
+
+        var dims = {};
+        dims.width = parseInt($("#background").css("width"));
+        dims.height = parseInt($("#background").css("height"));     
+
+        var coords = tt.MapConvert.GetCoordsFromPixels(pixels, dims);        
+        
+        return coords;            
+        
+    }
+    /*
+        Lat/Long:
+        x min: 33.159 lon
+        y min: 28.198 lat
+        x max: 48.603 lon
+        y max: 40.674 lat
+        
+        W = 2850 pixels
+        H = 2287 pixels
+        */
+
+
+
+var tt = {};
+tt.MapConvert = (function() {
+
+	//private map attributes
+    var edgeLon = 33.159;
+    var edgeLat = 40.674;
+    var spanLon  = (48.603 - 33.159);
+    var spanLat = (40.674 - 28.198);
+
+        
+	//private methods
+	//function thisFunc(someVar) {
+		//return something;
+	//}
+
+	
+	return {
+		//public attributes
+		//thisPubAtt: true,
+		
+		//public methods
+		GetCoordsFromPixels: function(pixelsIn, dimensions){
+
+            var ratioX = spanLon / dimensions.width;
+            var ratioY = spanLat / dimensions.height;
+            
+            var coords = {};
+            coords.lon = edgeLon + pixelsIn.x * ratioX;
+            coords.lat = edgeLat - pixelsIn.y * ratioY;
+            
+            return coords;
+            
+		},
+		GetPixelsFromCoords: function(coordsIn, dimensions){
+	
+            var ratioX = dimensions.width / spanLon;
+            var ratioY = dimensions.height / spanLat;
+            
+            var latsFromEdge = Math.abs(coordsIn.lat - edgeLat);
+            var lonsFromEdge = Math.abs(coordsIn.lon - edgeLon);
+            
+            var pixels = {};
+            pixels.y = latsFromEdge * ratioY;
+            pixels.x = lonsFromEdge * ratioX;
+         
+			return pixels;
+            
+		}
+	};
+})();
     
     
     
@@ -107,11 +173,12 @@ body {
 }
     
 #background{
-    background: url('AbrahamMap2.jpg') no-repeat center center;
+    background: url('AbramTravelsForAnimation.jpg') no-repeat center center;
    /* Ensure the html element always takes up the full height of the browser window */
     min-height:100%;
     /* The Magic */
     background-size:cover;
+    border: solid thin red; 
 }
     
     #spot{
@@ -133,8 +200,10 @@ body {
 </head>
 <body>
 <div id="control">
-    <input id="goBack" class="goDirection" value= "<<" type="button"/>
-    <input id="goForth" class="goDirection" value= ">>" type="button"/>
+    <!--<input id="goBack" class="goDirection" value= "<<" type="button"/>
+    <input id="goForth" class="goDirection" value= ">>" type="button"/>-->
+    <input id="reset" class="button" value= "Reset" type="button"/>
+    <input id="move" class="button" value= "Move" type="button"/>
     </div>
 <div id="background"></div> 
 <div id="spot"></div>
