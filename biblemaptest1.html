@@ -1,9 +1,8 @@
 <html>
 <head>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
-    
-    
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>  
+<script src="./Abram.geojson"></script>
     
 <script>
 //0 = lon, 1 = lat  
@@ -15,8 +14,8 @@
 
     ];
     
-    
-    
+    var arrCoords;
+    var jump = 10;
     
     
     
@@ -24,10 +23,12 @@
     
     $(document).ready(function(){
         
+        arrCoords = mapjson.features[1].geometry.coordinates;
+
         
         $(window).on("resize", function(){
                      
-console.log("resize",currPos);             
+//console.log("resize",currPos);             
             adjustLoc();
             
         });
@@ -42,26 +43,40 @@ console.log("resize",currPos);
             
             var coords = findLoc(pixels);
             
-            console.log(pixels.x + ", " + pixels.y);
-            console.log(coords.lon + ", " + coords.lat);
+            //console.log(pixels.x + ", " + pixels.y);
+            //console.log(coords.lon + ", " + coords.lat);
+            
+            alert("pixel x,y: " + pixels.x + ", " + pixels.y + "\ncoords lon,lat: " + coords.lon + ", " + coords.lat);
                             
+        });
+        
+        $("#jump").on("change", function() {
+            
+            jump = parseFloat($(this).val());
+        });
+        
+        $("#which").on("change", function() {
+            
+            which = parseInt($(this).val());
+//console.log(which);
+            arrCoords = mapjson.features[which].geometry.coordinates;
         });
         
         $("#reset").on("click", function() {
          
             
             currPos = 0;
-console.log("reset", currPos);             
+//console.log("reset", currPos);             
             adjustLoc();            
 
         });
         
         $("#move").on("click", function() { 
                         
-            if (currPos < geodata.length - 1) { 
-                currPos = currPos + 1;
+            if (currPos < arrCoords.length - jump) { 
+                currPos = currPos + jump;
             }
-console.log("move", currPos);                
+//console.log("move", currPos);                
             adjustLoc();
         });
         
@@ -75,8 +90,8 @@ console.log("move", currPos);
         dims.height = parseInt($("#background").css("height"));     
 
         var coords = {};
-        coords.lat = parseFloat(geodata[currPos][0]);
-        coords.lon = parseFloat(geodata[currPos][1]);
+        coords.lat = parseFloat(arrCoords[currPos][1]);
+        coords.lon = parseFloat(arrCoords[currPos][0]);
         
         var pixels = tt.MapConvert.GetPixelsFromCoords(coords, dims);
                 
@@ -99,7 +114,7 @@ console.log("move", currPos);
     }
     /*
         Lat/Long:
-        x min: 33.159 lon
+        x min: 33.159 lon 
         y min: 28.198 lat
         x max: 48.603 lon
         y max: 40.674 lat
@@ -179,6 +194,7 @@ body {
     /* The Magic */
     background-size:cover;
     border: solid thin red; 
+
 }
     
     #spot{
@@ -202,8 +218,13 @@ body {
 <div id="control">
     <!--<input id="goBack" class="goDirection" value= "<<" type="button"/>
     <input id="goForth" class="goDirection" value= ">>" type="button"/>-->
+    <select id="which">
+        <option value="1">Ur to Haran</option>
+        <option value="0">Haran to Canaan</option>
+    </select>
     <input id="reset" class="button" value= "Reset" type="button"/>
     <input id="move" class="button" value= "Move" type="button"/>
+     Jump By (enter number):<input id="jump" class="button" value= "10"/>
     </div>
 <div id="background"></div> 
 <div id="spot"></div>
