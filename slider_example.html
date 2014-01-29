@@ -1,0 +1,163 @@
+<html>
+<head>
+<meta charset="utf-8">
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js" type="text/javascript"></script>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/jquery-ui.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" media="all" />
+
+<script>
+
+/*
+GOAL: 
+
+1. make a slider that represents the surrounding 48 hours from right now, going back 24
+and forwards 24 hours, with each step representing 15 minutes
+
+2. show the Unix time in milliseconds for any selected date
+
+3. automate the slider so it takes each possible step in sequence
+
+4. show animated motion by resetting an html element's position in response to the timer
+
+*/
+    
+    
+//establish some Unix datetimes
+var now = new Date();
+var timeNow = now.getTime();
+var hrs24 = 1000 * 60 * 60 * 24;
+var minus24hours = timeNow - hrs24;
+var plus24hours = timeNow + hrs24;
+var mins15 = 1000 * 60 * 15;
+//globals for tracking date-times and animation
+var currSet;
+var timer;
+var timerSetSpeed = 30; //milliseconds between animate steps
+//globals for tracking position
+var initSize = 10;
+var initTop = 100;
+var initLeft = 100;
+var currSize;
+var currTop;
+var currLeft;
+    
+$(document).ready(function(){
+
+    setDateLabel(timeNow);
+    
+    
+    //slider docs at http://api.jqueryui.com/slider/
+
+	$("#slider").slider({
+        min: minus24hours, 
+        max: plus24hours,
+        step: mins15,
+        value: timeNow,
+        change: function (event, ui) {
+            setDateLabel(ui.value);
+            setMotionPosition(ui.value);
+        }
+    }); 
+    
+    $("#stop").on("click", function () {
+        clearInterval(timer);
+    });
+    
+    $("#animate").on("click", function () {
+       
+        resetAnimation();
+
+        
+        timer = setInterval(function() {                
+            currSet = $("#slider").slider("value");
+            if(currSet >= plus24hours) {
+                clearInterval(timer);                
+            } else {
+                $("#slider").slider("value", (currSet + mins15)); 
+            }                       
+        }, timerSetSpeed);
+        
+    });
+
+});
+
+function resetAnimation(){
+
+    $("#slider").slider("value", minus24hours);
+    currSize = initSize;    
+    currTop = initTop;
+    currLeft = initLeft;     
+    
+}
+    
+function setMotionPosition(time) {
+    
+    currSize = currSize + 1;    
+    currTop = currTop + 1;
+    currLeft = currLeft + 3;
+    
+    var styleObj = {
+        "position": "absolute",
+        "background-color" : "red",
+        "height": currSize,
+        "width": currSize,
+        "top": currTop,
+        "left" : currLeft                
+    };
+    
+    $("#motionDisplay").css(styleObj);
+        
+    
+    
+}
+    
+function setDateLabel(time) {
+ 
+    var a = new Date(time);
+    
+    var year = a.getFullYear();
+    var month = a.getMonth() + 1;
+    var date = a.getDate();
+    var hours = a.getHours();
+    var minutes = a.getMinutes();
+    var seconds = a.getSeconds();
+    
+    // will display time in 10:30:23 format
+    var formattedTime = year + '-' + pad(month,'00') + '-' + pad(date,'00') + ' ' + pad(hours,'00') + ':' + pad(minutes,'00') + ':' + pad(seconds,'00');
+    
+    $("#dateDisplay").html(time + ":  " + formattedTime);
+    
+}
+    
+function pad(num,field){
+    var n = '' + num;
+    var w = n.length;
+    var l = field.length;
+    var pad = w < l ? l-w : 0;
+    return field.substr(0,pad) + n;
+};
+
+</script>
+
+<style>
+
+
+</style>
+
+</head>
+<body>
+
+<div id="control">
+    <input id="animate" type="button" value="Animate"/>
+    <input id="stop" type="button" value="Stop"/>
+    <div id="slider"></div>
+</div>
+<div id="display">
+    <div id="dateDisplay"></div>
+    <div id="motionDisplay"></div>
+</div>
+
+</body>
+</html>
